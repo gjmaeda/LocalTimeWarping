@@ -1,3 +1,8 @@
+% This is a test code.
+%
+%
+%
+%
 % This code runs a local DTW optimization. It enforces that solutions are
 % smooth and do not skip the time indexes as in conventional DTW.
 % It may be also useful for optimizing over incomplete trajectories,
