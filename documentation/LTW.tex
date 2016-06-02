@@ -1,0 +1,117 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%%%        1         2         3         4         5         6         7         8
+
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out if you need a4paper
+
+%\documentclass[onecolumn, draftcls, journal]{IEEEtran}    %\newif\ifsinglecol
+
+
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4 paper
+
+\IEEEoverridecommandlockouts                              % This command is only needed if 
+                                                          % you want to use the \thanks command
+
+\overrideIEEEmargins                                      % Needed to meet printer requirements.
+
+\usepackage[dvips]{graphicx}
+\usepackage{ctable}
+\usepackage{verbatim}
+\usepackage{amsmath, amssymb}
+\usepackage[dvips]{graphics}
+\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage{bm}
+\usepackage{graphics} % for pdf, bitmapped graphics files
+\usepackage{epsfig} % for postscript graphics files
+\usepackage{times} % assumes new font selection scheme installed
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+%\usepackage{stfloats}
+\usepackage{color}
+\usepackage{lipsum}
+%\usepackage{pmat} %<======= partition matrix 
+\usepackage[T1]{fontenc} 
+%\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
+
+\newcommand{\B}[1]{\mathbf{#1}}
+\newcommand{\cb}[1]{\mathbf{#1}}
+\newcommand{\bb}[1]{\textbf{#1}}
+\newcommand{\bi}[1]{\boldsymbol{#1}}
+
+%\def\BState{\State\hskip-\ALG@thistlm}
+
+\newcommand\x{\times}
+\newcommand\bigzero{\makebox(0,0){\text{\huge0}}}
+\newcommand*{\bord}{\multicolumn{1}{c|}{}}
+
+\pdfminorversion=4
+
+\title{\LARGE \bf
+Time Alignment of Trajectories Using Local Time Warping
+}
+
+
+\author{Guilherme Maeda$$% <-this % stops a space
+\thanks{Intelligent Autonomous Systems Lab, Department of Computer Science,
+		Technische Universität Darmstadt, Hochschulstr. 10, 64289 Darmstadt, Germany
+        {\tt\small \{maeda\}@ias.tu-darmstadt.de}}%
+}
+
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+\input{TeX_parts/abstract.tex}
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+\input{TeX_parts/intro.tex}
+
+%\section{Related Work} 
+%\label{sec:related_work}
+%\input{TeX_parts/related_work.tex}
+
+\section{The Algorithm}
+%Proposed Method}
+\label{sec:proposed_method}
+\input{TeX_parts/method.tex}
+
+
+\section{Experiments}
+\label{sec:experiments}
+\input{TeX_parts/results.tex}
+
+%
+%\section{Conclusions}
+%\label{sec:conclusions}
+%\input{TeX_parts/conclusion.tex}
+
+
+
+\section{Acknowledgments}
+
+%
+%The research leading to these results has received funding from the TU Darmstadt, from the European Community's Seventh Framework Programme (FP7-ICT-2013-10) under grant agreement 610878 (3rdHand).
+%
+%%The research leading to these results has received funding from the European Community's Seventh Framework Programmes (FP7-ICT-2013-10) under grant agreement 610878 (3rdHand) and (FP7-ICT-2009-6) under grant agreement 270327 (ComPLACS).
+
+%\bibliographystyle{IEEEtran}
+\bibliographystyle{ieeetran}
+%\bibliography{bibliography_database}
+
+\IfFileExists{C:/Users/mito/Dropbox/Papers/pdf/gjmRef.bib}{\bibliography{C:/Users/mito/Dropbox/Papers/pdf/gjmRef}}{}
+%\IfFileExists{C:/Windows/notepad.exe}{\bibliography{C:/gjm/Dropbox/Papers/pdf/gjmRef}}{}
+\IfFileExists{/home/v5i7/Documents/v5i7.txt}{\bibliography{/home/v5i7/Dropbox/Papers/pdf/gjmRef}}{}
+\IfFileExists{/home/maeda/Documents/hahn.txt}{\bibliography{/home/maeda/Dropbox/Papers/pdf/gjmRef}}{}
+
+\end{document}
