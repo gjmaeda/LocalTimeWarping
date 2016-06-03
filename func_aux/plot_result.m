@@ -8,10 +8,14 @@ function [] = plot_result( dataRef, dataBefore, dataAfter, k )
 
     for j=1:3
         subplot(3,1,j);
-        plot(dataRef(:,j), sty([0 0 1], [], 3)  );
-        plot(dataBefore(:,j), sty([0.65 0.65 0.65], [], 3)  );
-        plot(dataAfter(:,j), sty([1 0 0 ], [], 3)  );
+        plot(linspace( 0,1,numel( dataRef(:,j) )),   dataRef(:,j), sty([0 0 1], [], 3)  );
+        plot(linspace( 0,1,numel( dataBefore(:,j) )),   dataBefore(:,j), sty([0.65 0.65 0.65], [], 3)  );
+        plot(linspace( 0,1,numel( dataAfter(:,j) )),   dataAfter(:,j), sty([1 0 0 ], [], 3)  );
     end
     subplot(3,1,1);
     legend({'Reference', 'Before', 'After'});
+    
+    
+    
+    
 end

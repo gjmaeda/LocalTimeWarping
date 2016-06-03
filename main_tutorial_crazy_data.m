@@ -16,30 +16,40 @@ clear; close all; clear; clc; dbstop if error;
 addpath('./func_aux'); 
 
 % ==============================================
-% Load a data set example containing real human demonstrations
+% Create some data set
 % =============================================
-load('data2.mat');
-nMaxDemos = 7; % limit the number of data to be aligned
-randVec = randsample( numel(data), nMaxDemos); % pick some demonstrations at random
-data_ = [];
-for k = randVec'
-    data_{end+1} = data{k};
+if 0
+    figurew;
+    t = 0:0.05:(2*pi);
+    y = 2 + 5.*sin( t ) + 2*sin( t/5 );
+    data{1} = y';
+    for k=1:5
+        y2 = 2+2*abs(randn)*cos(t).*y;
+        ts = cumsum(abs( sin(t*5*rand)  + cos(t*5*rand)    ));
+        y2 = interp1(t./t(end), y2, ts./ts(end));
+        y2 = [ y2(1).*ones(1, round(numel(y)*abs(0.4*randn))  )   y2   y2(end).*ones(1, round(numel(y2)*abs(0.4*randn)) )];    
+        plot(y2);
+        data{end+1} = y2';
+    end
+    y = [ y(1).*ones(1, round(numel(y)*0.25)  )   y   y(end).*ones(1, round(numel(y)*0.5) )];
+    plot(y, 'r');
+    data{1} = y';
+    save('data_c.mat', 'data')
+else
+    load('data_c.mat');
 end
-data = data_;
 
+
+
+nMaxDemos = numel(data);
 % ==============================================
 % plot misaligned data
 % =============================================
 hd = figurew('misaligned_data'); 
 set_fig_position([0.561 0.0972 0.195 0.792]);
-subplot(3,1,1); grid on; hold on; ylabel 'x';
-subplot(3,1,2); grid on; hold on; ylabel 'y';
-subplot(3,1,3); grid on; hold on; ylabel 'z'; xlabel 'time steps';
+ ylabel 'x'; xlabel 'time steps';
 for k=1:nMaxDemos
-    for j=1:3
-        subplot(3,1,j);
-        plot( linspace(0,1, numel(data{k}(:,j))), data{k}(:,j), sty([0.7 0.7 0.7])  );
-    end
+   plot( linspace(0,1, numel(data{k})), data{k}, sty([0.7 0.7 0.7])  );
 end
 drawnow;
 % Note that here all demonstrations have the same number of time steps.
@@ -49,11 +59,8 @@ drawnow;
 % ==============================================
 % select which training data is the reference and plot it
 % =============================================
-referenceDemo = 3;  % demonstration used as a reference. 
-for j=1:3
-    subplot(3,1,j);
-    plot( linspace(0,1,numel(data{referenceDemo}(:,j)))  , data{referenceDemo}(:,j), sty([0.5 0.5 1], [], 3)  );
-end
+referenceDemo = 1;  % demonstration used as a reference. 
+plot( linspace(0,1,numel(data{referenceDemo}))  , data{referenceDemo}, sty([0.5 0.5 1], [], 3)  );
 drawnow;
 % Chose which DoF to use as reference [1:x, 2:y, 3:z] for alignment. The other
 % DoFs will be aligned according to the solution found for the reference
@@ -67,13 +74,14 @@ refTrajectory = interp1(linspace(0,1,numel(refTrajectory)), refTrajectory, linsp
 % Align each of the demonstrations
 % =============================================
 ltw = LocalTW(refTrajectory', []); % create the object
+ltw.param.stopCriterion_costDeltaUp = 1;
 for k=1:nMaxDemos
     fprintf('Aligning demonstration %g of %g\n', k, nMaxDemos );
     if k~= referenceDemo
         queryTraj = data{k}(:, referenceAxis);        
         ltw.optimize(queryTraj'); % run the main optimization here
-        datan{k} = ltw.unwarp_dofs( data{k}'  )'; % align all DoFs        
-        plot_result(data{referenceDemo}, data{k}, datan{k}, k );
+        datan{k} = ltw.unwarp_dofs(  data{k}'  )'; % align all DoFs        
+       % plot_result(data{referenceDemo}, data{k}, datan{k}, k );
     else
         datan{k} = data{k};
     end
@@ -84,19 +92,11 @@ end
 % =============================================
 hd = figurew('Aligned_data'); 
 set_fig_position([0.761 0.0991 0.195 0.792]);
-subplot(3,1,1); grid on; hold on; ylabel 'x';
-subplot(3,1,2); grid on; hold on; ylabel 'y';
-subplot(3,1,3); grid on; hold on; ylabel 'z'; xlabel 'time steps';
+ylabel 'x'; xlabel 'time steps';
 for k=1:nMaxDemos
-    for j=1:3
-        subplot(3,1,j);
-        plot( linspace(0,1, numel(datan{k}(:,j))) , datan{k}(:,j), sty([0.7 0.7 0.7])  );
-    end
+    plot( linspace(0,1, numel(datan{k})) , datan{k}, sty([0.7 0.7 0.7])  );
 end
-for j=1:3
-    subplot(3,1,j);
-    plot(linspace(0,1, numel(data{k}(:,j))) , data{referenceDemo}(:,j), sty([0.5 0.5 1], [], 3)  );
-end
+plot(linspace(0,1, numel(data{referenceDemo})) , data{referenceDemo}, sty([0.5 0.5 1], [], 3)  );
 
 
 

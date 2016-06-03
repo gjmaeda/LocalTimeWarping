@@ -1,12 +1,12 @@
-classdef LocalDTW < handle
+classdef LocalTW < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
         param
         hist
-        tref
-        text
+        tref   % reference time
+        text   % extended time
         yref
         Phi    % the segment of Phiext that addresses tref
         Phiext % the basis functions on the extended time text
@@ -15,9 +15,10 @@ classdef LocalDTW < handle
     end
     
     methods
-        function obj = LocalDTW(yref, h)   
+        
+        function obj = LocalTW(yref, h)   
             
-            obj.param = LocalDTWParam();
+            obj.param = LocalTWParam();
             
             if isempty(h)
                 obj.param.h.scaledCut = [];
@@ -28,41 +29,33 @@ classdef LocalDTW < handle
                 obj.param.h.main = h.main;
                 obj.param.h.sol  = h.sol;
             end
+            % Create a fake, normalized time vector for the given reference
+            % trajectory
             obj.tref = linspace(0, 1, numel(yref));
-            obj.yref = yref;
             
-        end
-        
-        function [] = plot_history(obj, hist)
-            
-            % get PSI back to the original time
-            theta1    = hist.theta(1,:);     % shift in time
-            theta2to9 = hist.theta(2:end,:); % weights for bases
-            nIter     = numel(hist.theta(1,:));
-            
-            figurew
-            plot(obj.text, obj.Phiext', sty('k', [], 3)  )
-            plot(obj.tref, obj.Phi', sty('r', [], 3)  )
-
-            figurew('final_result');
-            fWarp2 = [ obj.Phi'*theta2to9 ]'; % warping function
-            plot(obj.tref, hist.yquery, sty( [0.6 0.6 0.6], [], 4));
-            for k=1:nIter % add the time shift
-                t_ref_new(k,:)  = theta1(1,k) + fWarp2(k,:).*obj.tref;
-                q_aligned(k,:)  = interp1(  t_ref_new(k,:), hist.yquery, obj.tref );
-                if ~mod(k,10) % plot after each N instances
-                    plot(obj.tref, q_aligned(k,:), sty_nl([0.8 0.8 0.8], [] , 1));
-                end
+            % Confirm yref is a column vector.
+            [m, n] =  size(yref);
+            if m > 1
+                obj.yref = yref';
+            else
+                obj.yref = yref;
             end
-            plot(obj.tref, obj.yref,  sty('b', [] , 4));
-            plot(obj.tref, q_aligned(end,:), sty('r', [] , 4));
-            legend({'To\_be\_aligned', 'Reference', 'Aligned\_trajectory'});  
             
-        end             
-        
+        end        
         
         function [hist]  = optimize(obj, traj2)
 
+            [m, n] = size(traj2);
+            if m > 1
+                traj2 = traj2';
+            end
+
+            % Resample traj2 to match original size
+            % =================================
+            if numel(traj2) ~= numel(obj.tref)
+                traj2 = interp1(   obj.t01(traj2), traj2, obj.t01(obj.tref) );
+            end
+            
             % scale data here
             % =================================
             [traj1_, traj2_, ~, r2] = obj.scale(obj.tref, obj.yref, traj2);
@@ -89,7 +82,6 @@ classdef LocalDTW < handle
             obj.t_warp = theta(1) + obj.warping_func.*obj.text;               
             
             %align = Align( hist.theta(:,end), obj.Phiext, obj.text, obj.tref);
-
             
             hist.pshow = round(linspace(1, hist.k(end),20));
             if hist.pshow(end) ~= hist.k(end)
@@ -107,16 +99,11 @@ classdef LocalDTW < handle
                 plot(obj.tref, hist.q_sol(end,:), sty( 'r', [] , 4)  )   ;
                 plot(obj.tref, obj.yref,  sty( 'b', [] , 2)  )   ;
             end
-
         end
-
-
-
 
         function [hist] = gradient_descent(obj, t, y, q)
         
             prm = obj.param;
-
             prm.plot_at_iter_number = round(linspace(1,prm.iterations, prm.max_number_plots));
             if prm.max_number_plots ~=0
                 prm.plot_at_iter_number = [prm.plot_at_iter_number  prm.iterations]; 
@@ -138,7 +125,6 @@ classdef LocalDTW < handle
             % extend the values of y and q
             ye = obj.extend_val(t, y, te);
             qe = obj.extend_val(t, q, te);
-
 
             % to compute cost function prepare both extended and normal values
             t2.nrm = t;      t2.ext = te;
@@ -185,7 +171,6 @@ classdef LocalDTW < handle
             end
             obj.Phiext = Phi;
 
-
         end
 
         function [theta_new, cost, q_aligned, warping_func] = update_theta(obj, t, y, q, Phi, theta, prm, iterNum)
@@ -224,8 +209,21 @@ classdef LocalDTW < handle
         end
         
         function y_align = unwarp_dofs(obj, y_orig )
+            
+            [m,n] = size(y_orig);
+            if m > n
+                y_orig = y_orig';
+            end           
+            if numel(y_orig(1,:)) ~= numel(obj.tref)
+                y_orig = interp1( obj.t01(y_orig(1,:)), y_orig', obj.t01(obj.tref) )';
+            end  
+            [m,n] = size(y_orig);
+            if m > n
+                y_orig = y_orig';
+            end
+            
             y_align =[];
-            for d=1:size(y_orig,1)
+            for d=1:numel(y_orig(:,1))
                 % extend the values of y and q
                 y_e = obj.extend_val(obj.tref, y_orig(d,:), obj.text);  
 
@@ -233,6 +231,33 @@ classdef LocalDTW < handle
                 y_align = [y_align;  align_data( obj.t_warp, y_e, obj.tref )];
             end
         end
+        
+        function [] = plot_history(obj, hist)
+            
+            % get PSI back to the original time
+            theta1    = hist.theta(1,:);     % shift in time
+            theta2to9 = hist.theta(2:end,:); % weights for bases
+            nIter     = numel(hist.theta(1,:));
+            
+            figurew
+            plot(obj.text, obj.Phiext', sty('k', [], 3)  )
+            plot(obj.tref, obj.Phi', sty('r', [], 3)  )
+
+            figurew('final_result');
+            fWarp2 = [ obj.Phi'*theta2to9 ]'; % warping function
+            plot(obj.tref, hist.yquery, sty( [0.6 0.6 0.6], [], 4));
+            for k=1:nIter % add the time shift
+                t_ref_new(k,:)  = theta1(1,k) + fWarp2(k,:).*obj.tref;
+                q_aligned(k,:)  = interp1(  t_ref_new(k,:), hist.yquery, obj.tref );
+                if ~mod(k,10) % plot after each N instances
+                    plot(obj.tref, q_aligned(k,:), sty_nl([0.8 0.8 0.8], [] , 1));
+                end
+            end
+            plot(obj.tref, obj.yref,  sty('b', [] , 4));
+            plot(obj.tref, q_aligned(end,:), sty('r', [] , 4));
+            legend({'To\_be\_aligned', 'Reference', 'Aligned\_trajectory'});
+            
+        end          
         
     end % methods
     
@@ -264,16 +289,13 @@ classdef LocalDTW < handle
                 error('Interpolation failed');
              end
 
-            N = length(t.nrm);
+            N = numel(t.nrm);
 
             % cost can be computed by direct comparison of y_q2 - y thanks to
             % interpolation
             cost = sum( sqrt( (q_aligned - y.nrm).^2)  )/N * 100 ;
-            mean(abs(q_aligned - y.nrm))*100
-            
             %fprintf('Cost %g\n', cost );
-
-
+            
             if ~isempty(style)
                 h = figurew(['debug_' num2str(indx)]);
                 plot(t.nrm, y.nrm, SGRAYBALL(10));        
@@ -315,7 +337,7 @@ classdef LocalDTW < handle
         
         function  te = get_extended_time(t)
             dt = t(2)-t(1);
-            nExt = round(numel(t)*0.6);
+            nExt = round(numel(t)*0.75);
             tendPlus   = t(end)+dt:dt:(numel(t)+nExt)*dt;
             tstartPlus = -nExt*dt:dt:t(1)-dt;
             te = [ tstartPlus t tendPlus ];
@@ -366,7 +388,20 @@ classdef LocalDTW < handle
 
         end
         
-        
+        function t = t01(q)
+        % return a vector linspace(0,1,N) where N is the size of q
+        % 
+        % INPUT
+        %   q: should be a vector of length N
+            [m,n] = size(q);
+            if m >1 && n > 1
+                error('Vector must be either [Nx1] or [1xN]');
+            end
+            t = linspace(0,1,numel(q));
+            if m > 1
+                t = t';
+            end
+        end       
     end
     
 end

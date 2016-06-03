@@ -1,4 +1,4 @@
-classdef LocalDTWParam
+classdef LocalTWParam
     
     properties
         % Initial guess of the time shift. This affects the first parameter of the
@@ -9,7 +9,7 @@ classdef LocalDTWParam
         % stopCriterion_costDeltaUp then the optimization should stop.
         % Cost going up may indicate that the warping of time given by the 
         % optimization is going beyond the limits of the data.       
-        stopCriterion_costDeltaUp = 0.2
+        stopCriterion_costDeltaUp = 1 %0.2
         
         % Only checks for stopCriterion_costDeltaUp after a certain number
         %  of iterations. This number is specified with costDeltaUpAfterNiter
