@@ -12,6 +12,10 @@
 % (Dixon, IJCAI, 2005). LTW may be better suited for this task but
 % more work is needed.
 %
+% The data artificially created with only 1 DoF. It is more challenging
+% than the main_tutorial_real_human_PTP.m
+% 
+%
 clear; close all; clear; clc; dbstop if error;
 addpath('./func_aux'); 
 
@@ -45,11 +49,15 @@ nMaxDemos = numel(data);
 % ==============================================
 % plot misaligned data
 % =============================================
-hd = figurew('misaligned_data'); 
-set_fig_position([0.561 0.0972 0.195 0.792]);
+h1 = figurew('misaligned_data'); grid off;
+set_fig_position(0.75*[0.344 0.383 0.267 0.447]);
  ylabel 'x'; xlabel 'time steps';
 for k=1:nMaxDemos
-   plot( linspace(0,1, numel(data{k})), data{k}, sty([0.7 0.7 0.7])  );
+   if k~= nMaxDemos
+       plot( linspace(0,1, numel(data{k})), data{k}, sty_nl([0.7 0.7 0.7], [], 2)  );
+   else
+       plot( linspace(0,1, numel(data{k})), data{k}, sty([0.7 0.7 0.7], [], 2)  );
+   end
 end
 drawnow;
 % Note that here all demonstrations have the same number of time steps.
@@ -61,6 +69,7 @@ drawnow;
 % =============================================
 referenceDemo = 1;  % demonstration used as a reference. 
 plot( linspace(0,1,numel(data{referenceDemo}))  , data{referenceDemo}, sty([0.5 0.5 1], [], 3)  );
+legend({'Demonstrations', 'Reference'}, 'Location', 'SouthWest')
 drawnow;
 % Chose which DoF to use as reference [1:x, 2:y, 3:z] for alignment. The other
 % DoFs will be aligned according to the solution found for the reference
@@ -90,19 +99,24 @@ end
 % ==============================================
 % Plot the final result
 % =============================================
-hd = figurew('Aligned_data'); 
-set_fig_position([0.761 0.0991 0.195 0.792]);
+h2 = figurew('Aligned_data'); grid off;
+set_fig_position(0.75*[0.648 0.384 0.267 0.447]);
 ylabel 'x'; xlabel 'time steps';
 for k=1:nMaxDemos
-    plot( linspace(0,1, numel(datan{k})) , datan{k}, sty([0.7 0.7 0.7])  );
+    if k~= nMaxDemos
+        plot( linspace(0,1, numel(datan{k})) , datan{k}, sty_nl([0.7 0.7 0.7], [], 2)  );
+    else
+        plot( linspace(0,1, numel(datan{k})) , datan{k}, sty([0.7 0.7 0.7], [], 2)  );
+    end
 end
 plot(linspace(0,1, numel(data{referenceDemo})) , data{referenceDemo}, sty([0.5 0.5 1], [], 3)  );
+legend({'Demonstrations', 'Reference'}, 'Location', 'SouthWest')
 
 
 
 
-
-
+break
+save_figure(figName, h1, [], []);
 
 
 

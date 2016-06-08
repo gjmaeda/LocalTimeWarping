@@ -12,6 +12,10 @@
 % (Dixon, IJCAI, 2005). LTW may be better suited for this task but
 % more work is needed.
 %
+% The data is real human point-to-point (that is, simple case) with 3 DoFs. 
+% Only one DoF is selected to align, and the others are aligned based 
+% on the found solution. 
+%
 clear; close all; clear; clc; dbstop if error;
 addpath('./func_aux'); 
 
